@@ -7,7 +7,7 @@ import java.util.TimerTask;
 public class Chronos extends TimerTask {
 
     public void run() {
-
+    Log.d("Test", "I'm alive!");
         LinkedList<Integer> path = new LinkedList<>();
         LinkedList<Integer> path2 = new LinkedList<>();
         LinkedList<Integer> time = new LinkedList<>();

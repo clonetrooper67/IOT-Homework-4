@@ -87,7 +87,7 @@ public class Main {
                 parcelArray.push(new Package(parcelArray.size(), startCity, endCity, weight));
 //				Clear the database
                 if (parcelArray.size() > 15) {
-                    Database.clearDatabase();
+//                    DatabaseHelper.clearDatabase();
                     parcelArray.clear();
                     Package temp = new Package(parcelArray.size(), startCity, endCity, weight);
                     parcelArray.push(temp);
