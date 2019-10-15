@@ -12,11 +12,11 @@ public class Chronos extends TimerTask {
         LinkedList<Integer> path2 = new LinkedList<>();
         LinkedList<Integer> time = new LinkedList<>();
 
-        for (int i = 0; i < Main.parcelArray.size(); i++) {
+        for (int i = 0; i < MainActivity.parcelArray.size(); i++) {
 //			Set the package's linked lists to our temporary ones
-            time = Main.parcelArray.get(i).getTimeOfTravel();
-            path = Main.parcelArray.get(i).getFastestPath();
-            path2 = Main.parcelArray.get(i).getCurrentPath();
+            time = MainActivity.parcelArray.get(i).getTimeOfTravel();
+            path = MainActivity.parcelArray.get(i).getFastestPath();
+            path2 = MainActivity.parcelArray.get(i).getCurrentPath();
 //			Move the next city into our current path
             if (path.size() > 0) {
                 path2.add(path.poll());
@@ -27,9 +27,9 @@ public class Chronos extends TimerTask {
                 time.add(numGot);
             }
 //			Write the changes back to the package
-            Main.parcelArray.get(i).setFastestPath(path);
-            Main.parcelArray.get(i).setCurrentPath(path2);
-            Main.parcelArray.get(i).setTimeOfTravel(time);
+            MainActivity.parcelArray.get(i).setFastestPath(path);
+            MainActivity.parcelArray.get(i).setCurrentPath(path2);
+            MainActivity.parcelArray.get(i).setTimeOfTravel(time);
 
             try {
 //                Database.updateDatabase(Main.parcelArray.get(i));

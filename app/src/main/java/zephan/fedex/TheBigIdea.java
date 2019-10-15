@@ -71,7 +71,7 @@ public class TheBigIdea extends Thread {
             myParcel.alreadySorted = true;
 
 //			Since this is done write the package to the database and the main parcel list
-            Main.parcelArray.set(threadNum, myParcel);
+            MainActivity.parcelArray.set(threadNum, myParcel);
 
         } catch (Exception e) {
             System.out.println("Ruh roh the world is ending: " + e);
