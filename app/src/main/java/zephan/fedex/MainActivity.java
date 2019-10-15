@@ -2,10 +2,13 @@ package zephan.fedex;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.Timer;
@@ -14,6 +17,12 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     public static LinkedList<Package> parcelArray = new LinkedList<Package>();
+
+    String cities[] = {"Northborough, MA", "Edison, NJ", "Pittsburgh, PA", "Allentown, PA", "Martinsburg, WV",
+            "Charlotte, NC", "Atlanta, GA", "Orlando, FL", "Memphis, TN", "Grove City, OH", "Indianapolis, IN",
+            "Detroit, MI", "New Berlin, WI", "Minneapolis, MN", "St. Louis, MO", "Kansas, KS", "Dallas, TX",
+            "Houston, TX", "Denver, CO", "Salt Lake City, UT", "Phoenix, AZ", "Los Angeles, CA", "Chino, CA",
+            "Sacramento, CA", "Seattle, WA"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +76,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void trackThePackage(View view) {
         try {
-            EditText text = (EditText) findViewById(R.id.trackingNum);
-            String bleh = text.getText().toString();
+            EditText text69 = (EditText) findViewById(R.id.trackingNum);
+            String bleh = text69.getText().toString();
             int index = Integer.parseInt(bleh);
 
             LinkedList<Integer> test = parcelArray.get(index).getCurrentPath();
@@ -77,8 +86,28 @@ public class MainActivity extends AppCompatActivity {
                 String currentIndex = Integer.toString(test.get(i));
                 Log.d("test", currentIndex);
             }
+
+            Context context = getApplicationContext();
+            CharSequence text =
+                    "Start City: " + cities[parcelArray.get(index).getStartCity()] + "\n"
+                            + "End City: " + cities[parcelArray.get(index).getEndCity()] + "\n"
+                            + "Path: " + "\n";
+
+            for (int i = 0; i < test.size(); i++) {
+                String city = cities[test.get(i)];
+
+                text = text + city + "\n";
+
+            }
+
+            int duration = Toast.LENGTH_LONG;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
         } catch (Exception e) {
         }
+
         Log.d("test", "Done");
     }
+
 }
