@@ -72,7 +72,7 @@ public class TheBigIdea extends Thread {
 
 //			Since this is done write the package to the database and the main parcel list
             MainActivity.parcelArray.set(threadNum, myParcel);
-
+            MainActivity.DB.insert(myParcel);
         } catch (Exception e) {
             System.out.println("Ruh roh the world is ending: " + e);
         }

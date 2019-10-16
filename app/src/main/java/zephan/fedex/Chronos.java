@@ -32,7 +32,7 @@ public class Chronos extends TimerTask {
             MainActivity.parcelArray.get(i).setTimeOfTravel(time);
 
             try {
-//                Database.updateDatabase(Main.parcelArray.get(i));
+                MainActivity.DB.update(MainActivity.parcelArray.get(i));
             } catch (Exception e) {
                 e.printStackTrace();
             }

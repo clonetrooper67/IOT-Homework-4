@@ -3,32 +3,69 @@ package zephan.fedex;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteOpenHelper;
 
-public class DatabaseManager {
+import androidx.annotation.Nullable;
 
-    private DatabaseHelper dbHelper;
+import java.util.LinkedList;
 
-    private Context context;
+public class DatabaseManager extends SQLiteOpenHelper {
 
-    private SQLiteDatabase database;
+    // Table Name
+    public static final String DATABASE_NAME = "packages.db";
+    // Table Name
+    public static final String TABLE_NAME = "parcels";
 
-    public DatabaseManager(Context c) {
-        context = c;
+    // Table columns
+    public static final String trackingNumColumn = "trackingNum";
+    public static final String startCityColumn = "startCity";
+    public static final String endCityColumn = "endCity";
+    public static final String weightColumn = "weight";
+    public static final String alreadySortedColumn = "alreadySorted";
+    public static final String currentPathColumn = "currentPath";
+    public static final String fastestPathColumn = "fastestPath";
+    public static final String timeOfTravelColumn = "timeOfTravel";
+
+
+    // database version
+    static final int DB_VERSION = 1;
+
+    // Creating table query
+    private static final String CREATE_TABLE = "create table " + TABLE_NAME + "(" + trackingNumColumn
+            + " INTEGER PRIMARY KEY, " + startCityColumn + " INTEGER NOT NULL, " + endCityColumn
+            + " INTEGER NOT NULL, " + weightColumn + " INTEGER, "
+            + alreadySortedColumn + " INTEGER NOT NULL, " + currentPathColumn + " TEXT, " + fastestPathColumn + " TEXT NOT NULL, "
+            + timeOfTravelColumn + " TEXT);";
+
+    public DatabaseManager(@Nullable Context context) {
+        super(context, DATABASE_NAME, null, DB_VERSION);
+        SQLiteDatabase db = this.getWritableDatabase();
     }
 
-    public DatabaseManager open() throws SQLException {
-        dbHelper = new DatabaseHelper(context);
-        database = dbHelper.getWritableDatabase();
-        return this;
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        SQLiteDatabase checkDB = null;
+        try {
+            checkDB = SQLiteDatabase.openDatabase(DATABASE_NAME, null,
+                    SQLiteDatabase.OPEN_READONLY);
+            checkDB.close();
+        } catch (SQLiteException e) {
+            db.execSQL(CREATE_TABLE);
+        }
+
     }
 
-    public void close() {
-        dbHelper.close();
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS packages_table");
+        onCreate(db);
     }
+
 
     public void insert(Package currentPackage) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
         String currentPath = "";
         String fastestPath = "";
@@ -48,60 +85,109 @@ public class DatabaseManager {
 
         ContentValues contentValue = new ContentValues();
 
-        contentValue.put(DatabaseHelper.trackingNum, currentPackage.trackingNumber);
-        contentValue.put(DatabaseHelper.startCity, currentPackage.startCity);
-        contentValue.put(DatabaseHelper.endCity, currentPackage.endCity);
-        contentValue.put(DatabaseHelper.weight, currentPackage.weight);
-        contentValue.put(DatabaseHelper.alreadySorted, 1);
-        contentValue.put(DatabaseHelper.currentPath, currentPath);
-        contentValue.put(DatabaseHelper.fastestPath, fastestPath);
-        contentValue.put(DatabaseHelper.timeOfTravel, timeOfTravel);
+        contentValue.put(trackingNumColumn, currentPackage.trackingNumber);
+        contentValue.put(startCityColumn, currentPackage.startCity);
+        contentValue.put(endCityColumn, currentPackage.endCity);
+        contentValue.put(weightColumn, currentPackage.weight);
+        contentValue.put(alreadySortedColumn, 1);
+        contentValue.put(currentPathColumn, currentPath);
+        contentValue.put(fastestPathColumn, fastestPath);
+        contentValue.put(timeOfTravelColumn, timeOfTravel);
 
-        database.insert(DatabaseHelper.TABLE_NAME, null, contentValue);
+        db.insert(TABLE_NAME, null, contentValue);
     }
 
-    public Cursor fetch(Package currentPackage) {
-        String[] columns = new String[] { DatabaseHelper.trackingNum, DatabaseHelper.startCity,
-                DatabaseHelper.endCity, DatabaseHelper.weight, DatabaseHelper.alreadySorted, DatabaseHelper.currentPath,
-                DatabaseHelper.fastestPath, DatabaseHelper.timeOfTravel};
-        Cursor cursor = database.query(DatabaseHelper.TABLE_NAME, columns, null,
+    public void read() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String[] columns = new String[]{trackingNumColumn, startCityColumn,
+                endCityColumn, weightColumn, alreadySortedColumn, currentPathColumn,
+                fastestPathColumn, timeOfTravelColumn};
+        Cursor rs = db.query(TABLE_NAME, columns, null,
                 null, null, null, null);
-        if (cursor != null) {
-            cursor.moveToFirst();
+        while (rs.moveToNext()) {
+//			Get the data we want from each set
+            int trackingNumber = rs.getInt(0);
+            int startCity = rs.getInt(1);
+            int endCity = rs.getInt(2);
+            int weight = rs.getInt(3);
+
+            boolean alreadySorted = bool(rs.getInt(4));
+
+            String currentPath = rs.getString(5);
+            String fastestPath = rs.getString(6);
+            String timeOfTravel = rs.getString(7);//			Make the linked lists we need
+            LinkedList<Integer> currentPathList = new LinkedList<Integer>();
+            LinkedList<Integer> fastestPathList = new LinkedList<Integer>();
+            LinkedList<Integer> timeOfTravelList = new LinkedList<Integer>();
+//			Make string arrays the data received from the database
+            String[] currentPathArray = currentPath.split(",");
+            String[] fastestPathArray = fastestPath.split(",");
+//            String[] timeOfTravelArray = timeOfTravel.split(",");
+//			Parse through each Array and push it into the list
+            for (int i = 1; i < currentPathArray.length; i++) {
+                currentPathList.add(Integer.parseInt(currentPathArray[i]));
+            }
+
+            for (int i = 1; i < fastestPathArray.length; i++) {
+                fastestPathList.add(Integer.parseInt(fastestPathArray[i]));
+            }
+
+//            for (int i = 1; i < timeOfTravelArray.length; i++) {
+//                timeOfTravelList.add(Integer.parseInt(timeOfTravelArray[i]));
+//            }
+//			Make a new package with the information
+            Package parcel = new Package(trackingNumber, startCity, endCity, weight);
+
+            parcel.setCurrentPath(currentPathList);
+            parcel.setFastestPath(fastestPathList);
+//            parcel.setTimeOfTravel(timeOfTravelList);
+            parcel.setAlreadySorted(alreadySorted);
+//			Push the package to the main array
+            MainActivity.parcelArray.add(parcel);
         }
-        return cursor;
+    }
+
+    private boolean bool(int anInt) {
+        if (anInt != 0) return true;
+        return false;
     }
 
     public void update(Package currentPackage) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
-        String currentPath = "";
-        String fastestPath = "";
-        String timeOfTravel = "";
+        String currentParsedPath = "";
+        String fastestParsedPath = "";
+        String parsedTimeOfTravel = "";
+
 //		Make the needed strings to write the lists to the database
         for (int i = 0; i < currentPackage.currentPath.size(); i++) {
-            currentPath = currentPath + "," + Integer.toString(currentPackage.currentPath.get(i));
+            currentParsedPath = currentParsedPath + "," + Integer.toString(currentPackage.currentPath.get(i));
         }
 
         for (int i = 0; i < currentPackage.fastestPath.size(); i++) {
-            fastestPath = fastestPath + "," + Integer.toString(currentPackage.fastestPath.get(i));
+            fastestParsedPath = fastestParsedPath + "," + Integer.toString(currentPackage.fastestPath.get(i));
         }
 
         for (int i = 0; i < currentPackage.timeOfTravel.size(); i++) {
-            timeOfTravel = timeOfTravel + "," + Integer.toString(currentPackage.timeOfTravel.get(i));
+            parsedTimeOfTravel = parsedTimeOfTravel + "," + Integer.toString(currentPackage.timeOfTravel.get(i));
         }
 
 
-        ContentValues contentValues = new ContentValues();
+        ContentValues vals = new ContentValues();
 
-        contentValues.put(DatabaseHelper.currentPath, currentPath);
-        contentValues.put(DatabaseHelper.fastestPath, fastestPath);
-        contentValues.put(DatabaseHelper.timeOfTravel, timeOfTravel);
+        vals.put(currentPathColumn, currentParsedPath);
+        vals.put(fastestPathColumn, fastestParsedPath);
+        vals.put(timeOfTravelColumn, parsedTimeOfTravel);
 
-        database.update(DatabaseHelper.TABLE_NAME, contentValues, DatabaseHelper.trackingNum + " = " + currentPackage.trackingNumber, null);
+        String SQL_ARG = "UPDATE ";
+
+        db.update(TABLE_NAME, vals, trackingNumColumn + "=" + currentPackage.trackingNumber, null);
     }
 
-    public void delete(int trackingNum) {
-        database.delete(DatabaseHelper.TABLE_NAME, DatabaseHelper.trackingNum + "=" + trackingNum, null);
+    public void delete() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("delete from "+ TABLE_NAME);
     }
 
 }

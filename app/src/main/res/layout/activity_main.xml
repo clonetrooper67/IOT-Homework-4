@@ -26,6 +26,7 @@
         android:layout_marginStart="131dp"
         android:layout_marginEnd="132dp"
         android:layout_marginBottom="128dp"
+        android:onClick="addAPackage"
         android:text="Add Package"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

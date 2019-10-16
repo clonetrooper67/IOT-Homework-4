@@ -24,30 +24,35 @@ public class MainActivity extends AppCompatActivity {
             "Houston, TX", "Denver, CO", "Salt Lake City, UT", "Phoenix, AZ", "Los Angeles, CA", "Chino, CA",
             "Sacramento, CA", "Seattle, WA"};
 
+    static DatabaseManager DB;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DatabaseManager DB = new DatabaseManager(this);
+
 
         LinkedList<Thread> threads = new LinkedList<Thread>();
 
-        parcelArray.add(new Package(0, 0, 12, 1));
-        parcelArray.add(new Package(1, 3, 8, 1));
-        parcelArray.add(new Package(2, 23, 8, 1));
-        parcelArray.add(new Package(3, 4, 8, 1));
-        parcelArray.add(new Package(4, 4, 8, 1));
-        parcelArray.add(new Package(5, 4, 8, 1));
-        parcelArray.add(new Package(6, 4, 8, 1));
-        parcelArray.add(new Package(7, 4, 8, 1));
-        parcelArray.add(new Package(8, 4, 8, 1));
-        parcelArray.add(new Package(9, 4, 8, 1));
-        parcelArray.add(new Package(10, 4, 8, 1));
-        parcelArray.add(new Package(11, 4, 8, 1));
-        parcelArray.add(new Package(12, 4, 8, 1));
-        parcelArray.add(new Package(13, 4, 8, 1));
-        parcelArray.add(new Package(14, 4, 8, 1));
+        DB = new DatabaseManager(this);
+        DB.read();
+
+//        parcelArray.add(new Package(0, 0, 12, 1));
+//        parcelArray.add(new Package(1, 3, 8, 1));
+//        parcelArray.add(new Package(2, 23, 8, 1));
+//        parcelArray.add(new Package(3, 4, 8, 1));
+//        parcelArray.add(new Package(4, 4, 8, 1));
+//        parcelArray.add(new Package(5, 4, 8, 1));
+//        parcelArray.add(new Package(6, 4, 8, 1));
+//        parcelArray.add(new Package(7, 4, 8, 1));
+//        parcelArray.add(new Package(8, 4, 8, 1));
+//        parcelArray.add(new Package(9, 4, 8, 1));
+//        parcelArray.add(new Package(10, 4, 8, 1));
+//        parcelArray.add(new Package(11, 4, 8, 1));
+//        parcelArray.add(new Package(12, 4, 8, 1));
+//        parcelArray.add(new Package(13, 4, 8, 1));
+//        parcelArray.add(new Package(14, 4, 8, 1));
 
 //		Go ahead and find the path for all of these
         for (int i = 0; i < parcelArray.size(); i++) {
@@ -66,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
 
         }
+
+//        DB.insert(parcelArray.get(0));
+
 
         Timer timer = new Timer();
         TimerTask task = new Chronos();
@@ -97,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
                 String city = cities[test.get(i)];
 
                 text = text + city + "\n";
-
             }
 
             int duration = Toast.LENGTH_LONG;
@@ -105,9 +112,18 @@ public class MainActivity extends AppCompatActivity {
             Toast toast = Toast.makeText(context, text, duration);
             toast.show();
         } catch (Exception e) {
-        }
+            Context context = getApplicationContext();
+            CharSequence text = "Ya Dun Goofed";
+            int duration = Toast.LENGTH_LONG;
 
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
         Log.d("test", "Done");
     }
 
+    public void addAPackage(View view) {
+        Intent intent = new Intent(this, AddingPackageActivity.class);
+        startActivity(intent);
+    }
 }
